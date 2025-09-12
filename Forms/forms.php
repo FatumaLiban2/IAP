@@ -1,8 +1,13 @@
+
 <?php
+// IMPORTANT: Make sure 'ClassAutoLoad.php' is included before this file is used.
+// It loads 'database.php' and 'mail.php', so the classes 'database' and 'MailHandler' are available.
 
 class forms {
     private $db;
     private $mailHandler;
+
+   
  
     
     public function signup() {
@@ -44,6 +49,11 @@ class forms {
     }
     
     private function processSignup() {
+        // Initialize database and mail handler
+        global $conf;
+        $this->mailHandler = new MailHandler();
+        $this->db = new DatabaseHandler($conf['db_type'], $conf['db_host'], $conf['db_user'], $conf['db_pass'], $conf['db_name'], $conf['db_port']);
+        
         $firstName = trim($_POST['first_name']);
         $lastName = trim($_POST['last_name']);
         $username = trim($_POST['username']);
@@ -114,6 +124,10 @@ class forms {
     }
     
     private function processLogin() {
+        // Initialize database handler
+        global $conf;
+        $this->db = new DatabaseHandler($conf['db_type'], $conf['db_host'], $conf['db_user'], $conf['db_pass'], $conf['db_name'], $conf['db_port']);
+        
         $username = trim($_POST['username']);
         $password = $_POST['password'];
         
@@ -122,14 +136,12 @@ class forms {
         }
         
         $user = $this->db->authenticateUser($username, $password);
-        
         if ($user) {
             // Start session and store user info
             session_start();
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
-            
             return ['success' => true, 'message' => 'Login successful!'];
         } else {
             return ['success' => false, 'message' => 'Invalid username or password.'];

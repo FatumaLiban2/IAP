@@ -13,9 +13,7 @@ This project implements a complete user registration and management system with 
 ```bash
 # Navigate to project directory
 cd c:\Apache24\htdocs\IAP
-
-# Run database setup (one time only)
-# Visit: http://localhost/IAP/setup.php
+# Create your database and tables manually using the provided SQL in this documentation.
 ```
 
 ### 2. Configure Email (Optional)
@@ -68,9 +66,7 @@ IAP/
 ├── 📄 dashboard.php          # User dashboard with numbered list
 ├── 📄 mail.php               # Email handling & validation class
 ├── 📄 database.php           # Database operations class
-├── 📄 verify.php             # Email verification landing page
 ├── 📄 logout.php             # Session management
-├── 📄 setup.php              # Database setup script
 ├── 📄 conf.php               # Application configuration
 ├── 📄 ClassAutoLoad.php      # Class autoloader
 ├── 📄 git-workflow.md        # Git workflow documentation
@@ -81,7 +77,7 @@ IAP/
 ├── 📁 Global/
 │   └── classes.php           # Utility classes
 └── 📁 plugins/
-    └── PHPMailer/            # Email library
+  └── PHPMailer/            # Email library
 ```
 
 ## 🔧 Technical Implementation
@@ -206,7 +202,7 @@ git push -u origin main
 ### Database Connection Issues  
 1. Ensure MySQL server is running
 2. Verify credentials in `conf.php`
-3. Run `setup.php` to create database and tables
+3. Create your database and tables manually using the provided SQL in this documentation
 
 ### User List Not Displaying
 1. Ensure users are registered in database

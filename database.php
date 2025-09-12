@@ -1,15 +1,31 @@
 <?php
 class DatabaseHandler {
+    private $db_type;
+    private $db_host;
+    private $db_user;
+    private $db_pass;
+    private $db_name;
+    private $db_port;
     private $pdo;
     
-    public function __construct($config) {
+    public function __construct($db_type, $db_host, $db_user, $db_pass, $db_name, $db_port) {
+        $this->db_type = $db_type;
+        $this->db_host = $db_host;
+        $this->db_user = $db_user;
+        $this->db_pass = $db_pass;
+        $this->db_name = $db_name;
+        $this->db_port = $db_port;
+        
+        // Automatically connect when creating the object
+        $this->connect();
+    }
+
+    public function connect() {
+        $dbData = "$this->db_type:host=$this->db_host;port=$this->db_port;dbname=$this->db_name";
         try {
-            // PostgreSQL DSN for Students database
-            $dsn = "pgsql:host={$config['db_host']};port={$config['db_port']};dbname=Students";
-            $this->pdo = new PDO($dsn, $config['db_user'], $config['db_pass']);
+            $this->pdo = new PDO($dbData, $this->db_user, $this->db_pass);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            // Create students table if it doesn't exist
-            $this->createStudentsTable();
+            return $this->pdo;
         } catch (PDOException $e) {
             error_log("Database connection failed: " . $e->getMessage());
             throw new Exception("Database connection failed: " . $e->getMessage());
@@ -17,27 +33,11 @@ class DatabaseHandler {
     }
     
     
-    private function createStudentsTable() {
-        // PostgreSQL syntax - uses SERIAL and BOOLEAN
-        $sql = "CREATE TABLE IF NOT EXISTS students (
-            id SERIAL PRIMARY KEY,
-            username VARCHAR(50) UNIQUE NOT NULL,            first_name VARCHAR(50) NOT NULL,
-            
-            first_name VARCHAR(50) NOT NULL,
-            last_name VARCHAR(50) NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            verified BOOLEAN DEFAULT FALSE
-        )";
-        $this->pdo->exec($sql);
-    }
-
     // ...existing code...
     public function registerUser($username, $first_name, $last_name, $email, $password) {
         try {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO students (username, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5)";
+            $sql = "INSERT INTO students (username, first_name, last_name, email, password) VALUES (?, ?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$username, $first_name, $last_name, $email, $hashedPassword]);
             return true;

@@ -2,7 +2,10 @@
 // Include the ClassAutoLoad Method
 require_once 'ClassAutoLoad.php';
 $layout = new layouts();
+$form = new forms();
+$hello = new classes();
 $layout->header($conf);
-if (isset($hello)) print $hello->do();
-if (isset($form)) $form->login();
+print $hello->do();
+$form->login();
 $layout->footer($conf);
+

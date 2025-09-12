@@ -1,7 +1,7 @@
 <?php
 // Include the ClassAutoLoad Method
 require_once 'ClassAutoLoad.php';
-
+$layout = new layouts(); // Add this line
 $layout->header($conf);
 
 if (isset($_GET['user'])) {
@@ -19,6 +19,6 @@ if (isset($_GET['user'])) {
     echo "<p><a href='index.php'>← Back to Home</a></p>";
     echo "</div>";
 }
-
+$layout = new layouts(); // Add this line
 $layout->footer($conf);
 ?>

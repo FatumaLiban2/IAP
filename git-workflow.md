@@ -26,7 +26,7 @@
    - Shows numbered list of registered users
    - Provides logout functionality
 
-5. **verify.php** - Email verification landing page
+<!-- verify.php removed: no longer used for email verification -->
    - Handles email verification links
    - Provides user feedback on verification
 
@@ -142,7 +142,7 @@ IAP/
 ├── dashboard.php (user dashboard with numbered list)
 ├── mail.php (email handling class)
 ├── database.php (database operations)
-├── verify.php (email verification)
+<!-- verify.php removed from project structure -->
 ├── logout.php (session management)
 ├── conf.php (configuration)
 ├── ClassAutoLoad.php (autoloader)

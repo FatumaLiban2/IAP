@@ -8,6 +8,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Instantiate forms class for database access
+$form = new forms();
 $layout->header($conf);
 ?>
 
@@ -22,26 +24,34 @@ $layout->header($conf);
     </div>
     
     <div style="margin: 20px 0; padding: 15px; background-color: #e9f7ef; border-radius: 5px;">
-        <h3>Progress Report</h3>
+        <h3>First 5 Registered Students</h3>
         <table style="width:100%; border-collapse: collapse;">
             <tr style="background-color: #d4efdf;">
-                <th style="padding: 8px; border: 1px solid #ccc;">Subject</th>
-                <th style="padding: 8px; border: 1px solid #ccc;">Grade</th>
-                <th style="padding: 8px; border: 1px solid #ccc;">Remarks</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">#</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">First Name</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Last Name</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Username</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Email</th>
             </tr>
-            <!-- Example data, replace with dynamic data as needed -->
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ccc;">Mathematics</td>
-                <td style="padding: 8px; border: 1px solid #ccc;">A</td>
-                <td style="padding: 8px; border: 1px solid #ccc;">Excellent</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ccc;">English</td>
-                <td style="padding: 8px; border: 1px solid #ccc;">B+</td>
-                <td style="padding: 8px; border: 1px solid #ccc;">Very Good</td>
-            </tr>
+            <?php
+            $users = $form->db->getNumberedUsersList();
+            $count = 0;
+            foreach ($users as $user) {
+                if ($count >= 5) break;
+                echo '<tr>';
+                echo '<td style="padding: 8px; border: 1px solid #ccc;">' . ($count + 1) . '</td>';
+                echo '<td style="padding: 8px; border: 1px solid #ccc;">' . htmlspecialchars($user['first_name']) . '</td>';
+                echo '<td style="padding: 8px; border: 1px solid #ccc;">' . htmlspecialchars($user['last_name']) . '</td>';
+                echo '<td style="padding: 8px; border: 1px solid #ccc;">' . htmlspecialchars($user['username']) . '</td>';
+                echo '<td style="padding: 8px; border: 1px solid #ccc;">' . htmlspecialchars($user['email']) . '</td>';
+                echo '</tr>';
+                $count++;
+            }
+            if ($count === 0) {
+                echo '<tr><td colspan="5" style="padding: 8px; border: 1px solid #ccc; text-align:center;">No students found.</td></tr>';
+            }
+            ?>
         </table>
-        <p style="margin-top: 10px;">For more details, contact your class teacher.</p>
     </div>
     
     <div style="margin: 20px 0;">
