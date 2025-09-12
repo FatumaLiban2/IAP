@@ -37,7 +37,7 @@ class DatabaseHandler {
     public function registerUser($username, $first_name, $last_name, $email, $password) {
         try {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO students (username, first_name, last_name, email, password) VALUES (?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO students (username, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$username, $first_name, $last_name, $email, $hashedPassword]);
             return true;
