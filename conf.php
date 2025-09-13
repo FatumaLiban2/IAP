@@ -9,7 +9,7 @@ $conf['db_type'] = 'pgsql';
 $conf['db_host'] = 'localhost';
 $conf['db_user'] = 'postgres';  // Default PostgreSQL user
 $conf['db_pass'] = 'Asma123';  // Set your PostgreSQL password
-$conf['db_name'] = 'students';
+$conf['db_name'] = 'Students';
 $conf['db_port'] = '5432';  // Default PostgreSQL port
 
 // Site Language

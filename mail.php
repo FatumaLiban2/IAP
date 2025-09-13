@@ -52,42 +52,38 @@ class MailHandler {
     }
     
     /**
-     * Send welcome email to new user (Alliance School Management version)
+     * Send verification email to new user with a verification link
      * @param string $userEmail
      * @param string $username
+     * @param string $token
      * @return bool
      */
-    public function sendWelcomeEmail($userEmail, $username) {
+    public function sendVerificationEmail($userEmail, $username, $token) {
         try {
-            // Validate email first
             if (!$this->validateEmail($userEmail)) {
                 throw new Exception("Invalid email address provided");
             }
-            // Recipients
             $this->mail->setFrom('fatuma.omar@strathmore.edu', 'Alliance School Management');
             $this->mail->addAddress($userEmail, $username);
-            // Content
             $this->mail->isHTML(true);
-            $this->mail->Subject = 'Welcome to Alliance School Management! Account Created';
+            $this->mail->Subject = 'Welcome to Alliance School Management Account Verification';
+            $verifyUrl = 'http://localhost/verify.php?token=' . urlencode($token);
             $this->mail->Body = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>"
                 . "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px;'>"
-                . "<h2 style='color: #333; text-align: center;'>Welcome to Alliance School Management</h2>"
+                . "<h2 style='color: #333; text-align: center;'>Welcome to Alliance School Management Account Verification</h2>"
                 . "<div style='background: white; padding: 20px; border-radius: 5px; margin: 20px 0;'>"
-                . "<p><strong>Hello {$username},</strong></p>"
+                . "<p>Hello <strong>{$username}</strong>,</p>"
                 . "<p>You requested an account on Alliance School Management.</p>"
-                . "<p>Your account has been created successfully. You can now log in to your dashboard and access your student portal.</p>"
-                . "<div style='margin: 30px 0; padding: 15px; background-color: #f1f3f4; border-radius: 5px;'>"
-                . "<p style='margin: 0;'><strong>Regards,</strong></p>"
-                . "<p style='margin: 5px 0 0 0;'>Systems Admin</p>"
-                . "<p style='margin: 0;'><strong>Alliance School Management</strong></p>"
-                . "</div>"
+                . "<p>In order to use this account you need to <a href='" . $verifyUrl . "'>Click Here</a> to complete the registration process.</p>"
+                . "<br>"
+                . "<p>Regards,<br>Systems Admin<br>Alliance School Management</p>"
                 . "</div>"
                 . "<div style='text-align: center; font-size: 12px; color: #666; margin-top: 20px;'>"
                 . "<p>This is an automated message from Alliance School Management.</p>"
                 . "</div>"
                 . "</div>"
                 . "</div>";
-            $this->mail->AltBody = "Hello {$username},\n\nYou requested an account on Alliance School Management.\n\nYour account has been created successfully. You can now log in to your dashboard and access your student portal.\n\nRegards,\nSystems Admin\nAlliance School Management";
+            $this->mail->AltBody = "Hello {$username},\n\nYou requested an account on Alliance School Management.\n\nIn order to use this account you need to visit the following link to complete the registration process: " . $verifyUrl . "\n\nRegards,\nSystems Admin\nAlliance School Management";
             $this->mail->send();
             return true;
         } catch (Exception $e) {

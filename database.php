@@ -25,6 +25,24 @@ class DatabaseHandler {
         try {
             $this->pdo = new PDO($dbData, $this->db_user, $this->db_pass);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Check and add missing columns: password, verified, verification_token
+            $columns = [
+                'password' => "ALTER TABLE students ADD COLUMN password TEXT NOT NULL DEFAULT ''",
+                'verified' => "ALTER TABLE students ADD COLUMN verified INTEGER NOT NULL DEFAULT 0",
+                'verification_token' => "ALTER TABLE students ADD COLUMN verification_token TEXT"
+            ];
+            foreach ($columns as $col => $sql) {
+                $stmt = $this->pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'students' AND column_name = '".$col."'");
+                if (!$stmt->fetch()) {
+                    $this->pdo->exec($sql);
+                    if ($col === 'password') {
+                        $default_password = password_hash('password123', PASSWORD_DEFAULT);
+                        $stmt2 = $this->pdo->prepare("UPDATE students SET password = ? WHERE password = '' OR password IS NULL");
+                        $stmt2->execute([$default_password]);
+                    }
+                }
+            }
             return $this->pdo;
         } catch (PDOException $e) {
             error_log("Database connection failed: " . $e->getMessage());
@@ -36,11 +54,16 @@ class DatabaseHandler {
     // ...existing code...
     public function registerUser($username, $first_name, $last_name, $email, $password) {
         try {
+            error_log("Registration attempt - Username: " . var_export($username, true) . 
+                     ", First: " . var_export($first_name, true) . 
+                     ", Last: " . var_export($last_name, true) . 
+                     ", Email: " . var_export($email, true));
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO students (username, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5)";
+            $token = bin2hex(random_bytes(16));
+            $sql = "INSERT INTO students (username, first_name, last_name, email, password, verified, verification_token) VALUES (?, ?, ?, ?, ?, 0, ?)";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$username, $first_name, $last_name, $email, $hashedPassword]);
-            return true;
+            $stmt->execute([$username, $first_name, $last_name, $email, $hashedPassword, $token]);
+            return $token;
         } catch (PDOException $e) {
             error_log("User registration failed: " . $e->getMessage());
             return false;
@@ -68,12 +91,15 @@ class DatabaseHandler {
     
     public function authenticateUser($username, $password) {
         try {
-            $sql = "SELECT id, first_name, last_name, username, email, password FROM students WHERE username = $1";
+            $sql = "SELECT id, first_name, last_name, username, email, password, verified FROM students WHERE username = ?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($user && password_verify($password, $user['password'])) {
-                unset($user['password']); // Don't return password
+                if (isset($user['verified']) && !$user['verified']) {
+                    return 'not_verified';
+                }
+                unset($user['password']);
                 return $user;
             }
             return false;
@@ -82,10 +108,21 @@ class DatabaseHandler {
             return false;
         }
     }
+    public function verifyUserByToken($token) {
+        try {
+            $sql = "UPDATE students SET verified = 1, verification_token = NULL WHERE verification_token = ? AND verified = 0";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$token]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Verification failed: " . $e->getMessage());
+            return false;
+        }
+    }
     
     public function userExists($username) {
         try {
-            $sql = "SELECT COUNT(*) FROM students WHERE username = $1";
+            $sql = "SELECT COUNT(*) FROM students WHERE username = ?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$username]);
             return $stmt->fetchColumn() > 0;
@@ -95,7 +132,7 @@ class DatabaseHandler {
     }
     public function emailExists($email) {
         try {
-            $sql = "SELECT COUNT(*) FROM students WHERE email = $1";
+            $sql = "SELECT COUNT(*) FROM students WHERE email = ?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$email]);
             return $stmt->fetchColumn() > 0;

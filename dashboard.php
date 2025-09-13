@@ -2,13 +2,17 @@
 // Include the ClassAutoLoad Method
 require_once 'ClassAutoLoad.php';
 
+// Start session
+session_start();
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: signin.php');
+    header('Location: login.php');
     exit();
 }
 
-// Instantiate forms class for database access
+// Instantiate classes
+$layout = new layouts();
 $form = new forms();
 $layout->header($conf);
 ?>
@@ -34,7 +38,8 @@ $layout->header($conf);
                 <th style="padding: 8px; border: 1px solid #ccc;">Email</th>
             </tr>
             <?php
-            $users = $form->db->getNumberedUsersList();
+            $db = $form->getDatabase();
+            $users = $db->getNumberedUsersList();
             $count = 0;
             foreach ($users as $user) {
                 if ($count >= 5) break;
@@ -60,5 +65,6 @@ $layout->header($conf);
 </div>
 
 <?php
+
 $layout->footer($conf);
 ?>

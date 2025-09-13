@@ -1,6 +1,10 @@
 <?php
 // Include the ClassAutoLoad Method
 require_once 'ClassAutoLoad.php';
+
+// Start session
+session_start();
+
 $layout = new layouts();
 $form = new forms();
 $hello = new classes();
