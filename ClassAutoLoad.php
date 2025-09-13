@@ -1,5 +1,5 @@
 <?php
-session_start(); // Start session for user authentication
+require 'Plugins/PHPMailer/vendor/autoload.php';
 require_once 'conf.php';
 $directories = ["Forms", "Layouts", "Global"];
 
@@ -13,12 +13,9 @@ spl_autoload_register(function ($className) use ($directories) {
     }
 });
 
-// Include additional required files
-require_once 'database.php';
-require_once 'mail.php';
 
 // create an instance of classes
-$objhello = new classes();
+
 $objform = new forms();
 $objlayout = new layouts();
 
