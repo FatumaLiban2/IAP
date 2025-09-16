@@ -14,8 +14,8 @@ spl_autoload_register(function ($className) use ($directories) {
 });
 
 
-// create an instance of classes
-
-$objform = new forms();
-$objlayout = new layouts();
+// Create instances of commonly used classes with consistent variable names
+// Using StudlyCaps for class names (Forms, Layouts) and $Obj* for instances
+$ObjForm = new Forms();
+$ObjLayout = new Layouts();
 
