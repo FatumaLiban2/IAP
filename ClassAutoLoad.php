@@ -1,5 +1,5 @@
 <?php
-require 'Plugins/PHPMailer/vendor/autoload.php';
+require 'vendor/autoload.php';
 require_once 'conf.php';
 $directories = ["Forms", "Layouts", "Global"];
 

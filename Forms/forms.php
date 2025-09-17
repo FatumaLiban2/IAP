@@ -1,16 +1,13 @@
 
 <?php
-
+require_once 'ClassAutoLoad.php';
+require_once __DIR__ . '/../conf.php';
 class Forms {
 
 
     public function signup() {
         global $conf;
 
-        // Connect to database (PostgreSQL)
-        $dsn = "pgsql:host={$conf['db_host']};port={$conf['db_port']};dbname={$conf['db_name']}";
-        $pdo = new PDO($dsn, $conf['db_user'], $conf['db_pass']);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Handle form submission
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -19,17 +16,25 @@ class Forms {
             $username   = trim($_POST['username']);
             $email      = trim($_POST['email']);
             $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            
+            // Connect to database (PostgreSQL)
+            $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
+            $pdo = new PDO($dsn, DB_USER, DB_PASS);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             // Insert into DB
             $stmt = $pdo->prepare("INSERT INTO students (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)");
             if ($stmt->execute([$first_name, $last_name, $username, $email, $password])) {
                 echo "<p style='color:green;'>Signup successful! You can now sign in.</p>";
                 require_once __DIR__ . '/../Global/SendMail.php';
-                $ObjSendMail = new SendMail();
-                $ObjSendMail->sendVerificationEmail($conf, $username, $email, bin2hex(random_bytes(16)));
+                $mail = new SendMail();
+                $mail->sendTestEmail($username, $email);
             } else {
                 echo "<p style='color:red;'>Error: could not sign up.</p>";
+                $stmt = null;
             }
+
+            $pdo = null;
         }
 ?>
         <form method="POST" action="">
